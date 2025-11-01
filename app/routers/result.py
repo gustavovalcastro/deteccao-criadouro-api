@@ -28,6 +28,7 @@ def _map_result(model) -> Result:
         status=model.status,
         created_at=model.created_at,
         processed_at=model.processed_at,
+        object_count=model.object_count,
         feedback=feedback,
         userId=model.user_id,
     )
@@ -77,7 +78,7 @@ def update_result_status(payload: ResultStatusUpdate, db: Session = Depends(get_
 @router.put("/updateResultImage", response_model=Result)
 def update_result_image(payload: ResultImageUpdate, db: Session = Depends(get_db)):
     result, error = ResultService.update_result_image_and_status(
-        db, payload.id, payload.resultImage, payload.status
+        db, payload.id, payload.resultImage, payload.status, payload.object_count
     )
     if error == "RESULT_NOT_FOUND":
         raise HTTPException(
@@ -88,6 +89,11 @@ def update_result_image(payload: ResultImageUpdate, db: Session = Depends(get_db
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Status invalido. Apenas 'finished' ou 'failed' sao permitidos para atualizacao de imagem"
+        )
+    if error == "OBJECT_COUNT_REQUIRED_FOR_FINISHED":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="object_count e obrigatorio quando o status e 'finished'"
         )
 
     return _map_result(result)

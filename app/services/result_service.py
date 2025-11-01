@@ -50,6 +50,7 @@ class ResultService:
         result_id: int,
         result_image: str,
         status,
+        object_count: Optional[int] = None,
     ) -> tuple[ResultModel | None, str | None]:
         result = ResultService.get_result_by_id(db, result_id)
         if result is None:
@@ -64,8 +65,13 @@ class ResultService:
         if new_status not in [ResultStatus.finished, ResultStatus.failed]:
             return None, "INVALID_STATUS_FOR_IMAGE_UPDATE"
 
+        # If status is finished, object_count must be provided
+        if new_status == ResultStatus.finished and object_count is None:
+            return None, "OBJECT_COUNT_REQUIRED_FOR_FINISHED"
+
         result.result_image = result_image
         result.status = new_status
+        result.object_count = object_count
         
         # Set processed_at timestamp when status is finished
         if new_status == ResultStatus.finished:
