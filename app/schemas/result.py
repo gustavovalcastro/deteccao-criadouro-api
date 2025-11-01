@@ -38,6 +38,7 @@ class Result(ResultBase):
     id: int
     campaignId: Optional[int] = None
     created_at: datetime
+    processed_at: Optional[datetime] = None
     feedback: ResultFeedback
     userId: Optional[int] = None
 
@@ -48,3 +49,23 @@ class Result(ResultBase):
 class ResultStatusUpdate(BaseModel):
     id: int
     status: ResultStatus
+
+
+class ResultFeedbackUpdate(BaseModel):
+    id: int
+    like: bool
+    comment: Optional[str] = None
+
+
+class ResultImageUpdate(BaseModel):
+    id: int
+    resultImage: str
+    status: ResultStatus
+
+
+class ImageUploadResponse(BaseModel):
+    success: bool
+    message: str
+    uploaded_image: Optional[str] = None
+    result_id: Optional[int] = None
+    failed_count: int = 0

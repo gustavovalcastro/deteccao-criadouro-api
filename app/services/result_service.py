@@ -6,8 +6,7 @@ from sqlalchemy.orm import Session
 from app.models.result import ResultModel
 from app.models.campaign import CampaignModel
 from app.models.user import UserModel
-from app.models.enums.result import ResultStatus
-from app.schemas.result import ResultCreate
+from app.models.enums.result import ResultStatus, ResultType
 
 
 class CampaignNotFoundError(Exception):
@@ -19,46 +18,6 @@ class UserNotFoundError(Exception):
 
 
 class ResultService:
-
-    @staticmethod
-    def create_result(db: Session, payload: ResultCreate) -> ResultModel:
-        if payload.campaignId is not None:
-            campaign = (
-                db.query(CampaignModel)
-                .filter(CampaignModel.id == payload.campaignId)
-                .first()
-            )
-            if not campaign:
-                raise CampaignNotFoundError()
-
-        user: Optional[UserModel] = None
-        if payload.userId is not None:
-            user = db.query(UserModel).filter(UserModel.id == payload.userId).first()
-            if not user:
-                raise UserNotFoundError()
-
-        feedback_like = payload.feedback.like if payload.feedback else False
-        feedback_comment = payload.feedback.comment if payload.feedback else None
-
-        result = ResultModel(
-            campaign_id=payload.campaignId,
-            user_id=user.id if user else None,
-            original_image=payload.originalImage,
-            result_image=payload.resultImage,
-            type=payload.type,
-            status=payload.status,
-            created_at=datetime.utcnow(),
-            feedback_like=feedback_like,
-            feedback_comment=feedback_comment,
-        )
-
-        if user:
-            result.user = user
-
-        db.add(result)
-        db.commit()
-        db.refresh(result)
-        return result
 
     @staticmethod
     def get_result_by_id(db: Session, result_id: int) -> ResultModel | None:
@@ -86,9 +45,141 @@ class ResultService:
         return result, None
 
     @staticmethod
+    def update_result_image_and_status(
+        db: Session,
+        result_id: int,
+        result_image: str,
+        status,
+    ) -> tuple[ResultModel | None, str | None]:
+        result = ResultService.get_result_by_id(db, result_id)
+        if result is None:
+            return None, "RESULT_NOT_FOUND"
+
+        try:
+            new_status = status if isinstance(status, ResultStatus) else ResultStatus(status)
+        except ValueError:
+            return None, "INVALID_STATUS"
+
+        # Only allow processing or failed statuses for result image updates
+        if new_status not in [ResultStatus.finished, ResultStatus.failed]:
+            return None, "INVALID_STATUS_FOR_IMAGE_UPDATE"
+
+        result.result_image = result_image
+        result.status = new_status
+        
+        # Set processed_at timestamp when status is finished
+        if new_status == ResultStatus.finished:
+            result.processed_at = datetime.utcnow()
+
+        db.commit()
+        db.refresh(result)
+        return result, None
+
+    @staticmethod
+    def update_result_feedback(
+        db: Session,
+        result_id: int,
+        like: bool,
+        comment: Optional[str] = None,
+    ) -> tuple[ResultModel | None, str | None]:
+        result = ResultService.get_result_by_id(db, result_id)
+        if result is None:
+            return None, "RESULT_NOT_FOUND"
+
+        result.feedback_like = like
+        result.feedback_comment = comment
+
+        db.commit()
+        db.refresh(result)
+        return result, None
+
+    @staticmethod
+    def delete_result(db: Session, result_id: int) -> tuple[bool, str | None]:
+        """
+        Delete a result by ID.
+        
+        Args:
+            db: Database session
+            result_id: ID of the result to delete
+            
+        Returns:
+            Tuple of (success: bool, error: str | None)
+        """
+        result = ResultService.get_result_by_id(db, result_id)
+        if result is None:
+            return False, "RESULT_NOT_FOUND"
+        
+        db.delete(result)
+        db.commit()
+        return True, None
+
+    @staticmethod
     def get_results_by_user(db: Session, user_id: int) -> list[ResultModel]:
         return (
             db.query(ResultModel)
             .filter(ResultModel.user_id == user_id)
             .all()
         )
+
+    @staticmethod
+    def create_result_from_upload(
+        db: Session,
+        image_url: str,
+        user_id: int,
+        campaign_id: Optional[int] = None,
+        result_type: Optional[ResultType] = None,
+    ) -> ResultModel:
+        """
+        Create a result from an uploaded image.
+        
+        Args:
+            db: Database session
+            image_url: The Azure blob URL of the uploaded image
+            user_id: The ID of the user uploading the image
+            campaign_id: Optional campaign ID
+            result_type: Optional result type, defaults to ResultType.terreno
+            
+        Returns:
+            The created ResultModel
+            
+        Raises:
+            UserNotFoundError: If the user doesn't exist
+            CampaignNotFoundError: If the campaign doesn't exist
+        """
+        # Verify user exists
+        user = db.query(UserModel).filter(UserModel.id == user_id).first()
+        if not user:
+            raise UserNotFoundError()
+
+        # Verify campaign exists if provided
+        if campaign_id is not None:
+            campaign = (
+                db.query(CampaignModel)
+                .filter(CampaignModel.id == campaign_id)
+                .first()
+            )
+            if not campaign:
+                raise CampaignNotFoundError()
+
+        # Set defaults
+        if result_type is None:
+            result_type = ResultType.terreno
+
+        result = ResultModel(
+            campaign_id=campaign_id,
+            user_id=user_id,
+            original_image=image_url,
+            result_image=None,
+            type=result_type,
+            status=ResultStatus.processing,
+            created_at=datetime.utcnow(),
+            feedback_like=False,
+            feedback_comment=None,
+        )
+
+        result.user = user
+
+        db.add(result)
+        db.commit()
+        db.refresh(result)
+        return result

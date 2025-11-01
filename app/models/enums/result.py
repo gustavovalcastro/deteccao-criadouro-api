@@ -6,6 +6,6 @@ class ResultType(enum.Enum):
 
 class ResultStatus(enum.Enum):
     visualized = "visualized"
-    finished = "finished"
     processing = "processing"
+    finished = "finished"
     failed = "failed"

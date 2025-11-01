@@ -55,6 +55,7 @@ coverage.xml
 *.py,cover
 *.log
 .pytest_cache/
+.hypothesis/
 cover/
 
 # Translations
@@ -100,6 +101,10 @@ celerybeat.pid
 .vscode/
 .idea/
 *.code-workspace
+*.swp
+*.swo
+*~
+.cursor/
 
 # macOS
 .DS_Store
@@ -110,4 +115,29 @@ celerybeat.pid
 Thumbs.db
 desktop.ini
 
+# Linux
+.directory
+
 meubanco.db
+
+# Python type checkers
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pytype/
+.pyre/
+.pyrightcache/
+
+# Linting tools
+.ruff_cache/
+.pylint.d/
+
+# Environment variables
+.env.local
+.env.*.local
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup

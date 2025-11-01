@@ -16,6 +16,7 @@ class ResultModel(Base):
     type = Column(Enum(ResultType, name="result_type"), nullable=False)
     status = Column(Enum(ResultStatus, name="result_status"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    processed_at = Column(DateTime, nullable=True)
     feedback_like = Column(Boolean, default=False, nullable=False)
     feedback_comment = Column(String, nullable=True)
 
