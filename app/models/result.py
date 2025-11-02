@@ -18,7 +18,7 @@ class ResultModel(Base):
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     processed_at = Column(DateTime, nullable=True)
     object_count = Column(Integer, nullable=True)
-    feedback_like = Column(Boolean, default=False, nullable=False)
+    feedback_like = Column(Boolean, default=None, nullable=True)
     feedback_comment = Column(String, nullable=True)
 
     campaign = relationship("CampaignModel", back_populates="results")
