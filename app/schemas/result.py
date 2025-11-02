@@ -17,7 +17,7 @@ class ResultStatus(str, enum.Enum):
 
 
 class ResultFeedback(BaseModel):
-    like: bool = False
+    like: Optional[bool] = None
     comment: Optional[str] = None
 
 
