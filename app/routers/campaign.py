@@ -18,16 +18,17 @@ router = APIRouter(prefix="/campaigns", tags=["campaigns"])
 
 
 def _map_result(result_model) -> CampaignResult:
+    feedback = CampaignResultFeedback(
+        like=result_model.feedback_like,
+        comment=result_model.feedback_comment,
+    )
     return CampaignResult(
         id=result_model.id,
         originalImage=result_model.original_image,
         resultImage=result_model.result_image,
         type=result_model.type,
         status=result_model.status,
-        feedback=CampaignResultFeedback(
-            like=result_model.feedback_like,
-            comment=result_model.feedback_comment,
-        ),
+        feedback=feedback,
     )
 
 

@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 
 class CampaignResultFeedback(BaseModel):
-    like: bool = False
+    like: Optional[bool] = None
     comment: Optional[str] = None
 
 
@@ -14,7 +14,7 @@ class CampaignResult(BaseModel):
     resultImage: Optional[str] = None
     type: str
     status: str
-    feedback: Optional[CampaignResultFeedback] = None
+    feedback: CampaignResultFeedback
 
 
 class CampaignCreate(BaseModel):

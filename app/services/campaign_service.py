@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List, Tuple
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.models.campaign import CampaignModel
 from app.models.userPortal import UserPortalModel
 from app.models.user import UserModel
@@ -51,14 +51,20 @@ class CampaignService:
         return campaigns, city, None
 
     @staticmethod
-
-    @staticmethod
     def get_all_campaigns(db: Session) -> List[CampaignModel]:
         return db.query(CampaignModel).all()
+
+    @staticmethod
     def get_campaigns_for_user(
         db: Session, user_id: int
     ) -> Tuple[List[CampaignModel] | None, str | None, str | None]:
-        user = db.query(UserModel).filter(UserModel.id == user_id).first()
+        # Eagerly load the address relationship to avoid lazy loading issues
+        user = (
+            db.query(UserModel)
+            .options(joinedload(UserModel.address))
+            .filter(UserModel.id == user_id)
+            .first()
+        )
         if not user:
             return None, None, "USER_NOT_FOUND"
         if not user.address:
