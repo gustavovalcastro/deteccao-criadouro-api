@@ -5,7 +5,7 @@ from typing import Optional
 from sqlalchemy.orm import Session
 from app.models.result import ResultModel
 from app.models.campaign import CampaignModel
-from app.models.user import UserModel
+from app.models.user import UserModel, AddressModel
 from app.models.enums.result import ResultStatus, ResultType
 
 
@@ -134,6 +134,8 @@ class ResultService:
         user_id: int,
         campaign_id: Optional[int] = None,
         result_type: Optional[ResultType] = None,
+        lat: Optional[str] = None,
+        lng: Optional[str] = None,
     ) -> ResultModel:
         """
         Create a result from an uploaded image.
@@ -144,6 +146,8 @@ class ResultService:
             user_id: The ID of the user uploading the image
             campaign_id: Optional campaign ID
             result_type: Optional result type, defaults to ResultType.terreno
+            lat: Optional latitude coordinate
+            lng: Optional longitude coordinate
             
         Returns:
             The created ResultModel
@@ -171,6 +175,13 @@ class ResultService:
         if result_type is None:
             result_type = ResultType.terreno
 
+        # If coordinates are not provided, use user's address coordinates
+        if lat is None or lng is None:
+            address = db.query(AddressModel).filter(AddressModel.user_id == user_id).first()
+            if address:
+                lat = address.lat if lat is None else lat
+                lng = address.lng if lng is None else lng
+
         result = ResultModel(
             campaign_id=campaign_id,
             user_id=user_id,
@@ -181,6 +192,8 @@ class ResultService:
             created_at=datetime.utcnow(),
             feedback_like=None,
             feedback_comment=None,
+            lat=lat,
+            lng=lng,
         )
 
         result.user = user

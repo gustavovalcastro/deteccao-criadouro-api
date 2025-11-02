@@ -20,6 +20,8 @@ class ResultModel(Base):
     object_count = Column(Integer, nullable=True)
     feedback_like = Column(Boolean, default=None, nullable=True)
     feedback_comment = Column(String, nullable=True)
+    lat = Column(String(50), nullable=True)
+    lng = Column(String(50), nullable=True)
 
     campaign = relationship("CampaignModel", back_populates="results")
     user = relationship("UserModel", back_populates="results")

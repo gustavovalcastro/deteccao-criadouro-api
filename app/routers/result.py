@@ -1,7 +1,7 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
 from sqlalchemy.orm import Session
-from app.schemas.result import Result, ResultFeedback, ResultStatusUpdate, ResultFeedbackUpdate, ResultImageUpdate, ImageUploadResponse, ResultType
+from app.schemas.result import Result, ResultFeedback, ResultStatusUpdate, ResultFeedbackUpdate, ResultImageUpdate, ImageUploadResponse, ResultType, Coordinates
 from app.services.result_service import (
     ResultService,
     CampaignNotFoundError,
@@ -10,6 +10,7 @@ from app.services.result_service import (
 from app.services.azure_storage_service import AzureStorageService
 from app.database import get_db
 import os
+import json
 
 router = APIRouter(prefix="/results", tags=["results"])
 
@@ -18,6 +19,10 @@ def _map_result(model) -> Result:
     feedback = ResultFeedback(
         like=model.feedback_like,
         comment=model.feedback_comment,
+    )
+    coordinates = Coordinates(
+        lat=model.lat,
+        lng=model.lng,
     )
     return Result(
         id=model.id,
@@ -30,6 +35,7 @@ def _map_result(model) -> Result:
         processed_at=model.processed_at,
         object_count=model.object_count,
         feedback=feedback,
+        coordinates=coordinates,
         userId=model.user_id,
     )
 
@@ -131,6 +137,7 @@ async def upload_images(
     userId: int = Form(...),
     campaignId: Optional[int] = Form(None),
     type: ResultType = Form(...),
+    coordinates: Optional[str] = Form(None),
     db: Session = Depends(get_db),
 ):
 
@@ -153,6 +160,59 @@ async def upload_images(
         # Convert schema ResultType to model ResultType
         result_type = ModelResultType[type.value]
         
+        # Parse coordinates JSON if provided
+        lat = None
+        lng = None
+        if coordinates:
+            # Handle string "null" explicitly
+            if coordinates.strip().lower() == "null":
+                lat = None
+                lng = None
+            else:
+                try:
+                    coords_data = json.loads(coordinates)
+                    if coords_data is not None:
+                        # Strict validation: lat and lng must be strings
+                        lat = coords_data.get("lat")
+                        lng = coords_data.get("lng") or coords_data.get("long")  # Support both "lng" and "long"
+                        
+                        # Validate types - must be strings or None
+                        if lat is not None and not isinstance(lat, str):
+                            raise HTTPException(
+                                status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="Invalid coordinates: 'lat' must be a string"
+                            )
+                        if lng is not None and not isinstance(lng, str):
+                            raise HTTPException(
+                                status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="Invalid coordinates: 'lng' must be a string"
+                            )
+                        
+                        # Validate that coordinate strings are numeric (optional but recommended)
+                        if lat is not None:
+                            try:
+                                float(lat)
+                            except (ValueError, TypeError):
+                                raise HTTPException(
+                                    status_code=status.HTTP_400_BAD_REQUEST,
+                                    detail="Invalid coordinates: 'lat' must be a numeric string"
+                                )
+                        if lng is not None:
+                            try:
+                                float(lng)
+                            except (ValueError, TypeError):
+                                raise HTTPException(
+                                    status_code=status.HTTP_400_BAD_REQUEST,
+                                    detail="Invalid coordinates: 'lng' must be a numeric string"
+                                )
+                except HTTPException:
+                    raise
+                except (json.JSONDecodeError, TypeError):
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Invalid coordinates format. Expected JSON object like {\"lat\": \"string\", \"lng\": \"string\"} or null"
+                    )
+        
         # Create result record
         result = ResultService.create_result_from_upload(
             db=db,
@@ -160,6 +220,8 @@ async def upload_images(
             user_id=userId,
             campaign_id=campaignId,
             result_type=result_type,
+            lat=lat,
+            lng=lng,
         )
         
         return ImageUploadResponse(

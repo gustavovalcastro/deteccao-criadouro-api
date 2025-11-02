@@ -21,6 +21,11 @@ class ResultFeedback(BaseModel):
     comment: Optional[str] = None
 
 
+class Coordinates(BaseModel):
+    lat: Optional[str] = None
+    lng: Optional[str] = None
+
+
 class ResultBase(BaseModel):
     originalImage: str
     resultImage: Optional[str] = None
@@ -41,6 +46,7 @@ class Result(ResultBase):
     processed_at: Optional[datetime] = None
     object_count: Optional[int] = None
     feedback: ResultFeedback
+    coordinates: Coordinates
     userId: Optional[int] = None
 
     class Config:
