@@ -179,7 +179,7 @@ class ResultService:
             type=result_type,
             status=ResultStatus.processing,
             created_at=datetime.utcnow(),
-            feedback_like=False,
+            feedback_like=None,
             feedback_comment=None,
         )
 
