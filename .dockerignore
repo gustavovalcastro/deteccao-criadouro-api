@@ -1,10 +1,16 @@
-# Byte-compiled / optimized / DLL files
+# Python cache files
 __pycache__/
 *.py[cod]
 *$py.class
-
-# C extensions
 *.so
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
 
 # Distribution / packaging
 .Python
@@ -26,99 +32,74 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# Virtual environments
-.venv/
-venv/
-ENV/
-env/
-env.bak/
-venv.bak/
-
-# PyInstaller
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-*.log
-.pytest_cache/
-.hypothesis/
-cover/
-
-# Translations
-*.mo
-*.pot
-
-# PyBuilder
-.pybuilder/
-target/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# pyenv
-.python-version
-
-# Pipenv
-Pipfile
-Pipfile.lock
-
-# Poetry
-poetry.lock
-poetry.toml
-
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow
-__pypackages__/
-
-# Celery
-celerybeat-schedule
-celerybeat.pid
-
-# dotenv - IMPORTANT: Exclude environment files from Docker builds
+# Environment files (IMPORTANT: Keep these out of Docker images)
 .env
 .env.*
 !.env.example
 
-# Local databases and logs
+# Local databases
 *.db
 *.sqlite3
+meubanco.db
+
+# Logs
 *.log
 
 # Editor directories and files
 .vscode/
 .idea/
+.cursor/
 *.code-workspace
 *.swp
 *.swo
 *~
-.cursor/
 
-# macOS
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker files
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+.docker/
+
+# Test and coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+cover/
+
+# Documentation (optional - uncomment if you don't want README in image)
+# README.md
+# *.md
+# docs/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# OS files
 .DS_Store
 .AppleDouble
 .LSOverride
-
-# Windows
 Thumbs.db
 desktop.ini
-
-# Linux
 .directory
 
-meubanco.db
+# GCP credentials (IMPORTANT: Keep secrets out of Docker images)
+tcc-upload-secret/
 
 # Python type checkers
 .mypy_cache/
@@ -132,44 +113,21 @@ dmypy.json
 .ruff_cache/
 .pylint.d/
 
-# Environment variables
-.env.local
-.env.*.local
-
 # Temporary files
 *.tmp
 *.temp
 *.bak
 *.backup
 
-# GCP
-tcc-upload-secret/
-
-# Git
-.git/
-.gitignore
-.gitattributes
-
-# Docker
-Dockerfile*
-.dockerignore
-docker-compose*.yml
-.docker/
-
-# Documentation
-README.md
-*.md
-docs/
-
-# CI/CD
-.github/
-.gitlab-ci.yml
-.travis.yml
-.circleci/
-
-# IDE and editor files
-*.sublime-project
-*.sublime-workspace
-*.vim
-*.idea
+# Other
+.python-version
+Pipfile
+Pipfile.lock
+poetry.lock
+poetry.toml
+__pypackages__/
+celerybeat-schedule
+celerybeat.pid
+pip-log.txt
+pip-delete-this-directory.txt
 
