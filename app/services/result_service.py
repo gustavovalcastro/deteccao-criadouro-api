@@ -142,7 +142,7 @@ class ResultService:
         
         Args:
             db: Database session
-            image_url: The Azure blob URL of the uploaded image
+            image_url: The GCP Storage URL of the uploaded image
             user_id: The ID of the user uploading the image
             campaign_id: Optional campaign ID
             result_type: Optional result type, defaults to ResultType.terreno

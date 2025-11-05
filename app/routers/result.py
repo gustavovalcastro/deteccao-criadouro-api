@@ -7,7 +7,7 @@ from app.services.result_service import (
     CampaignNotFoundError,
     UserNotFoundError,
 )
-from app.services.azure_storage_service import AzureStorageService
+from app.services.gcp_storage_service import GCPStorageService
 from app.database import get_db
 import os
 import json
@@ -143,7 +143,7 @@ async def upload_images(
 
     from app.models.enums.result import ResultType as ModelResultType
     
-    azure_storage = AzureStorageService()
+    gcp_storage = GCPStorageService()
     
     try:
         # Read file content
@@ -154,8 +154,8 @@ async def upload_images(
         if not file_extension:
             file_extension = "jpg"  # Default extension
         
-        # Upload to Azure
-        image_url = azure_storage.upload_image(contents, file_extension)
+        # Upload to GCP Storage
+        image_url = gcp_storage.upload_image(contents, file_extension)
         
         # Convert schema ResultType to model ResultType
         result_type = ModelResultType[type.value]

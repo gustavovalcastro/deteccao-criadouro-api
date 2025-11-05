@@ -1,9 +1,8 @@
 alembic==1.17.1
 annotated-types==0.7.0
 anyio==4.11.0
-azure-core==1.36.0
-azure-storage-blob==12.21.0
 bcrypt==5.0.0
+google-cloud-storage==2.18.2
 certifi==2025.10.5
 cffi==2.0.0
 charset-normalizer==3.4.4

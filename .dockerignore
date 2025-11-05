@@ -87,7 +87,7 @@ __pypackages__/
 celerybeat-schedule
 celerybeat.pid
 
-# dotenv
+# dotenv - IMPORTANT: Exclude environment files from Docker builds
 .env
 .env.*
 !.env.example
@@ -144,3 +144,32 @@ dmypy.json
 
 # GCP
 tcc-upload-secret/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+.docker/
+
+# Documentation
+README.md
+*.md
+docs/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# IDE and editor files
+*.sublime-project
+*.sublime-workspace
+*.vim
+*.idea
+
