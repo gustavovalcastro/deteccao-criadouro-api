@@ -10,7 +10,7 @@ class ResultModel(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     campaign_id = Column(Integer, ForeignKey("campaign.id", ondelete="SET NULL"), nullable=True)
-    user_id = Column(Integer, ForeignKey("user.id", ondelete="SET NULL"), nullable=True, index=True)
+    user_id = Column(Integer, ForeignKey("user_mobile.id", ondelete="SET NULL"), nullable=True, index=True)
     original_image = Column(String, nullable=False)
     result_image = Column(String, nullable=True)
     type = Column(Enum(ResultType, name="result_type"), nullable=False)

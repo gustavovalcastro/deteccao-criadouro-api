@@ -4,7 +4,7 @@ from app.database import Base
 
 
 class UserModel(Base):
-    __tablename__ = "user"
+    __tablename__ = "user_mobile"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), nullable=False)
@@ -19,7 +19,7 @@ class AddressModel(Base):
     __tablename__ = "address"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("user.id"), unique=True)
+    user_id = Column(Integer, ForeignKey("user_mobile.id"), unique=True)
     cep = Column(String(8), nullable=False)
     street = Column(String(255), nullable=False)
     number = Column(Integer, nullable=False)
