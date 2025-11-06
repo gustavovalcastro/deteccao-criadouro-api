@@ -120,6 +120,10 @@ class ResultService:
         return True, None
 
     @staticmethod
+    def get_all_results(db: Session) -> list[ResultModel]:
+        return db.query(ResultModel).all()
+
+    @staticmethod
     def get_results_by_user(db: Session, user_id: int) -> list[ResultModel]:
         return (
             db.query(ResultModel)

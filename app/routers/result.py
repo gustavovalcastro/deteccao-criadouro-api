@@ -40,6 +40,12 @@ def _map_result(model) -> Result:
     )
 
 
+@router.get("/getAllResults", response_model=List[Result])
+def get_all_results(db: Session = Depends(get_db)):
+    results = ResultService.get_all_results(db)
+    return [_map_result(result) for result in results]
+
+
 @router.get("/getResult/{result_id}", response_model=Result)
 def get_result_by_id(result_id: int, db: Session = Depends(get_db)):
     result = ResultService.get_result_by_id(db, result_id)
