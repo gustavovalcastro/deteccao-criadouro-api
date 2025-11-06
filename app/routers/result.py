@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from app.schemas.result import Result, ResultFeedback, ResultStatusUpdate, ResultFeedbackUpdate, ResultImageUpdate, ImageUploadResponse, ResultType, Coordinates
@@ -141,7 +141,7 @@ def delete_result(result_id: int, db: Session = Depends(get_db)):
 async def upload_images(
     file: UploadFile = File(...),
     userId: int = Form(...),
-    campaignId: Optional[int] = Form(None),
+    campaignId: Optional[Union[int, str]] = Form(None),
     type: ResultType = Form(...),
     coordinates: Optional[str] = Form(None),
     db: Session = Depends(get_db),
@@ -165,6 +165,31 @@ async def upload_images(
         
         # Convert schema ResultType to model ResultType
         result_type = ModelResultType[type.value]
+        
+        # Handle campaignId: accept both int and str, convert empty string or "null" to None
+        campaign_id_int = None
+        if campaignId is not None:
+            if isinstance(campaignId, int):
+                campaign_id_int = campaignId
+            elif isinstance(campaignId, str):
+                campaign_id_str = campaignId.strip()
+                if campaign_id_str and campaign_id_str.lower() != "null":
+                    try:
+                        campaign_id_int = int(campaign_id_str)
+                    except (ValueError, TypeError):
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="campaignId must be a valid integer or null"
+                        )
+            else:
+                # Try to convert other types to int
+                try:
+                    campaign_id_int = int(campaignId)
+                except (ValueError, TypeError):
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="campaignId must be a valid integer or null"
+                    )
         
         # Parse coordinates JSON if provided
         lat = None
@@ -224,7 +249,7 @@ async def upload_images(
             db=db,
             image_url=image_url,
             user_id=userId,
-            campaign_id=campaignId,
+            campaign_id=campaign_id_int,
             result_type=result_type,
             lat=lat,
             lng=lng,
