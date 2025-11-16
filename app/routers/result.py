@@ -8,6 +8,7 @@ from app.services.result_service import (
     UserNotFoundError,
 )
 from app.services.gcp_storage_service import GCPStorageService
+from app.services.detection_api_service import DetectionAPIService
 from app.database import get_db
 import os
 import json
@@ -255,9 +256,20 @@ async def upload_images(
             lng=lng,
         )
         
+        # Call Detection API to process the image
+        detection_api = DetectionAPIService()
+        try:
+            detection_response = detection_api.process_image(image_url, result.id)
+            # Use the detection API response message if available, otherwise use default
+            message = detection_response.get("message", "Imagem enviada com sucesso")
+        except Exception as e:
+            # If detection API call fails, log but don't fail the upload
+            # The image was already uploaded and result created
+            message = f"Imagem enviada com sucesso, mas falha ao processar com Detection API: {str(e)}"
+        
         return ImageUploadResponse(
             success=True,
-            message="Imagem enviada com sucesso",
+            message=message,
             uploaded_image=image_url,
             result_id=result.id,
             failed_count=0,
