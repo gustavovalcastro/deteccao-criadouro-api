@@ -132,6 +132,26 @@ class ResultService:
         )
 
     @staticmethod
+    def get_results_by_city(db: Session, city: str) -> list[ResultModel]:
+        """
+        Get all results associated with users located in the specified city.
+        
+        Args:
+            db: Database session
+            city: Name of the city to filter by
+            
+        Returns:
+            List of ResultModel instances for users in the specified city
+        """
+        return (
+            db.query(ResultModel)
+            .join(UserModel, ResultModel.user_id == UserModel.id)
+            .join(AddressModel, UserModel.id == AddressModel.user_id)
+            .filter(AddressModel.city == city)
+            .all()
+        )
+
+    @staticmethod
     def create_result_from_upload(
         db: Session,
         image_url: str,

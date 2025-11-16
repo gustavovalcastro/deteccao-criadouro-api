@@ -77,3 +77,7 @@ class ImageUploadResponse(BaseModel):
     uploaded_image: Optional[str] = None
     result_id: Optional[int] = None
     failed_count: int = 0
+
+
+class CityRequest(BaseModel):
+    city: str

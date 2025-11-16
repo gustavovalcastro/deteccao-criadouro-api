@@ -1,7 +1,7 @@
 from typing import List, Optional, Union
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
 from sqlalchemy.orm import Session
-from app.schemas.result import Result, ResultFeedback, ResultStatusUpdate, ResultFeedbackUpdate, ResultImageUpdate, ImageUploadResponse, ResultType, Coordinates
+from app.schemas.result import Result, ResultFeedback, ResultStatusUpdate, ResultFeedbackUpdate, ResultImageUpdate, ImageUploadResponse, ResultType, Coordinates, CityRequest
 from app.services.result_service import (
     ResultService,
     CampaignNotFoundError,
@@ -66,6 +66,18 @@ def get_results_by_user(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Resultado nao encontrado para este usuario"
+        )
+
+    return [_map_result(result) for result in results]
+
+
+@router.post("/getResultByCity", response_model=List[Result])
+def get_results_by_city(payload: CityRequest, db: Session = Depends(get_db)):
+    results = ResultService.get_results_by_city(db, payload.city)
+    if not results:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Nenhum resultado encontrado para a cidade: {payload.city}"
         )
 
     return [_map_result(result) for result in results]
