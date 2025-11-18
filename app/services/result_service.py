@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Optional
 from sqlalchemy.orm import Session
+from sqlalchemy import desc
 from app.models.result import ResultModel
 from app.models.campaign import CampaignModel
 from app.models.user import UserModel, AddressModel
@@ -121,13 +122,14 @@ class ResultService:
 
     @staticmethod
     def get_all_results(db: Session) -> list[ResultModel]:
-        return db.query(ResultModel).all()
+        return db.query(ResultModel).order_by(desc(ResultModel.created_at)).all()
 
     @staticmethod
     def get_results_by_user(db: Session, user_id: int) -> list[ResultModel]:
         return (
             db.query(ResultModel)
             .filter(ResultModel.user_id == user_id)
+            .order_by(desc(ResultModel.created_at))
             .all()
         )
 
@@ -148,6 +150,7 @@ class ResultService:
             .join(UserModel, ResultModel.user_id == UserModel.id)
             .join(AddressModel, UserModel.id == AddressModel.user_id)
             .filter(AddressModel.city == city)
+            .order_by(desc(ResultModel.created_at))
             .all()
         )
 
